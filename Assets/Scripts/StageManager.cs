@@ -23,13 +23,13 @@ public class StageManager : MonoBehaviour {
 	public int index;
 
 	void Start () {
+		row *= ScreenManager.GetGameContainerScale();
 		if(!PlayerPrefs.HasKey("maxStageUnLock")){
 			RandomStageData();
 			SaveStageData();
 		}else{
 			LoadStageData();
 		}
-
 		
 	}
 	
@@ -40,12 +40,6 @@ public class StageManager : MonoBehaviour {
 		int k = 0;
 		if(index < 0)
 			index = 0;
-		// if(stageCountInRow * index < maxStage / 4){
-		// 	for(int i = 0; i < lineH.Length; i++){
-		// 		lineH[i].localPosition = new Vector3(0, (index + i) * row , 0);			
-		// 	}
-		// }
-		
 
 		for(int i = 0; i < stages.Length; i++){
 			int currentStageIndex = stageCountInRow * index + i;

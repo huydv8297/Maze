@@ -16,6 +16,9 @@ public class MazeGenerator : MonoBehaviour {
 	public PathManager pathManager;
 	public BugController bugController;
 
+	public GameObject bug;
+	public GameObject gate;
+
 	public Vector2Int startPoint;
 	public Vector2Int endPoint;
 
@@ -28,12 +31,64 @@ public class MazeGenerator : MonoBehaviour {
 
 	public List<Cell> path = new List<Cell>();
 	public List<Cell> tempPath;
-	void Start () {
-		
+	// void Start () {
+	// 	CreateWall();
+	// 	CreateCell();
+	// 	GenerateMaze();
+	// 	StartGame();
+	// }
+
+	void OnEnable()
+    {
 		CreateWall();
 		CreateCell();
 		GenerateMaze();
 		StartGame();
+		isFoundDestination = false;
+    }
+
+	void OnDisable()
+    {
+		isFoundDestination = true;
+		// bug.SetActive(false);
+		// gate.SetActive(false);
+		if(bug != null)
+			Destroy(bug);
+		if(bug != null)
+			Destroy(gate);
+		path.Clear();
+		tempPath.Clear();
+		pathManager.Clear();
+		DestroyWall();
+		// DisableWall();
+    }
+
+	public void DisableWall(){
+		for(int i = 0; i < wallRow.GetLength(0); i++){
+			for(int j = 0; j < wallRow.GetLength(1); j++){
+				wallRow[i, j].SetActive(false);
+			}
+		}
+
+		for(int i = 0; i < wallCol.GetLength(0); i++){
+			for(int j = 0; j < wallCol.GetLength(1); j++){
+				wallCol[i, j].SetActive(false);
+			}
+		}
+	}
+
+	public void DestroyWall(){
+		for(int i = 0; i < wallRow.GetLength(0); i++){
+			for(int j = 0; j < wallRow.GetLength(1); j++){
+				Destroy(wallRow[i, j]);
+			}
+		}
+
+		for(int i = 0; i < wallCol.GetLength(0); i++){
+			for(int j = 0; j < wallCol.GetLength(1); j++){
+				Destroy(wallCol[i, j]);
+			}
+		}
 	}
 	
 	public void CreateWall(){
@@ -61,6 +116,8 @@ public class MazeGenerator : MonoBehaviour {
 			}
 		}
 	}
+
+
 
 	public void CreateCell(){
 		cells = new Cell[col, row];
@@ -158,14 +215,15 @@ public class MazeGenerator : MonoBehaviour {
 
 	public void StartGame(){
 		startPoint = new Vector2Int(0, row -1);
-		endPoint = new Vector2Int(Random.Range(0, col), Random.Range(0, row));
+		endPoint = new Vector2Int(Random.Range(1, col), Random.Range(1, row));
+		
 		InstantiateBug(GetCellPosition(cells[startPoint.x, startPoint.y]));
 		InstantiateGate(GetCellPosition(cells[endPoint.x, endPoint.y]));
 		
 	}
 
 	public void InstantiateBug(Vector3 position){
-		GameObject bug = Instantiate(bugPrefab);
+		bug = Instantiate(bugPrefab);
 		bug.transform.SetParent(wallContainer);
 		bug.transform.localPosition = position;
 		bugController = bug.GetComponent<BugController>() as BugController;
@@ -173,7 +231,7 @@ public class MazeGenerator : MonoBehaviour {
 	}
 
 	public void InstantiateGate(Vector3 position){
-		GameObject gate = Instantiate(gatePrefab);
+		gate = Instantiate(gatePrefab);
 		gate.transform.SetParent(wallContainer);
 		gate.transform.localPosition = position;
 		gate.transform.localScale = Vector3.one;
@@ -196,7 +254,6 @@ public class MazeGenerator : MonoBehaviour {
 	public Vector3[] ConvertPathToVector3(){
 		Vector3[] pathInVector3 = new Vector3[tempPath.Count];
 		for(int i = 0; i < tempPath.Count; i++){
-			Debug.Log(GetCellPosition(tempPath[i]));
 			pathInVector3[i] = new Vector3(GetCellPosition(tempPath[i]).x, GetCellPosition(tempPath[i]).y, 0f);
 		}
 		return pathInVector3;
@@ -284,11 +341,5 @@ public class MazeGenerator : MonoBehaviour {
 		return (float) (topRight.x - topLeft.x) / col;
 	}
 
-	public float GetStandardCellWidth(){
-		Vector3 topRight = Camera.main.ScreenToWorldPoint(new Vector3(1080f, 1920f));
-		Vector3 topLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, 1920f));
-
-		return (float) (topRight.x - topLeft.x) / col;
-	}
 
 }

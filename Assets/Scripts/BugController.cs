@@ -43,8 +43,6 @@ public class BugController : MonoBehaviour {
 		}
 	}
 
-	
-
 	protected void RotateTowards(Vector3 currentPos) {
 		if(currentIndex == path.Count - 1)
 			return;

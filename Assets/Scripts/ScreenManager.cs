@@ -16,13 +16,12 @@ public class ScreenManager : MonoBehaviour {
 	public GameObject stageBox;
 	public GameObject playBox;
 
-	float currentScreenScale;
-	float editorScreenScale = (float) 10f / 16f;
+	static float currentScreenScale;
+	static float editorScreenScale = (float) 10f / 16f;
 	// Update is called once per frame
 
 	void Awake(){
 		currentScreenScale = (float) Screen.width / Screen.height;
-		Debug.Log(GetGameContainerScale());
 		stageBox.transform.localScale = new Vector3(GetGameContainerScale(), GetGameContainerScale(), 1);
 		playBox.transform.localScale = new Vector3(GetGameContainerScale(), GetGameContainerScale(), 1);
 		
@@ -34,7 +33,7 @@ public class ScreenManager : MonoBehaviour {
 		if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Moved) {
             Vector2 touchDeltaPosition = Input.GetTouch(0).deltaPosition;
 			Debug.Log("swip" + touchDeltaPosition);
-			if(camera.localPosition.y - touchDeltaPosition.y * speed >= 0 && stageManager.IsNotLastStage())
+			if(camera.localPosition.y - touchDeltaPosition.y * speed >= 0)
             	camera.Translate(0, -touchDeltaPosition.y * speed, 0);
 
 			if(camera.localPosition.y - touchDeltaPosition.y * speed < 0)
@@ -60,7 +59,7 @@ public class ScreenManager : MonoBehaviour {
 	}
 
 
-	public float GetGameContainerScale(){
+	public static float GetGameContainerScale(){
 		return currentScreenScale / editorScreenScale;
 	}
 

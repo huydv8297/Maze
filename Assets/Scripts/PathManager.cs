@@ -63,4 +63,13 @@ public class PathManager : MonoBehaviour {
 			bugController.Move(lines);
 		}
 	}
+
+	public void Clear(){
+		foreach (var line in lines)
+		{
+			// line.SetActive(false);
+			Destroy(line);
+		}
+		lines.Clear();
+	}
 }
