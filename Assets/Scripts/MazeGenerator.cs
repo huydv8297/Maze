@@ -12,15 +12,15 @@ public class MazeGenerator : MonoBehaviour {
 
 	public GameObject bugPrefab;
 	public GameObject gatePrefab;
-
-	public Color pathColor;
-	public Material pathMaterial;
-	public LineRenderer pathRenderer;
+	public ScreenManager screenManager;
+	public PathManager pathManager;
+	public BugController bugController;
 
 	public Vector2Int startPoint;
 	public Vector2Int endPoint;
 
-	public float cellWidth = 0.625f;
+	//Portrait 10:16
+	public float cellWidth = 0.6261128f;
 	public int row = 13;
 	public int col = 10;
 	public int maxCellConnectInRow = 3;
@@ -33,7 +33,6 @@ public class MazeGenerator : MonoBehaviour {
 		CreateWall();
 		CreateCell();
 		GenerateMaze();
-		cellWidth = GetCellWidth();
 		StartGame();
 	}
 	
@@ -43,7 +42,7 @@ public class MazeGenerator : MonoBehaviour {
 			for(int j = 0; j < wallRow.GetLength(1); j++){
 				GameObject newWall = Instantiate(wallPrefab);
 				newWall.transform.SetParent(wallContainer);
-				newWall.transform.localPosition = new Vector3(i * cellWidth, j* cellWidth, 0);
+				newWall.transform.localPosition = new Vector3(i * cellWidth + cellWidth / 2, j * cellWidth, 0);
 				newWall.transform.localScale = Vector3.one;
 				wallRow[i, j] = newWall;
 			}
@@ -55,7 +54,7 @@ public class MazeGenerator : MonoBehaviour {
 			for(int j = 0; j < wallCol.GetLength(1); j++){
 				GameObject newWall = Instantiate(wallPrefab);
 				newWall.transform.SetParent(wallContainer);
-				newWall.transform.localPosition = new Vector3(i * cellWidth + 0.057f, j* cellWidth, 0);
+				newWall.transform.localPosition = new Vector3(i * cellWidth , j * cellWidth  + cellWidth / 2, 0);
 				newWall.transform.localRotation = Quaternion.Euler(0, 0, 90);
 				newWall.transform.localScale = Vector3.one;
 				wallCol[i, j] = newWall;
@@ -168,26 +167,39 @@ public class MazeGenerator : MonoBehaviour {
 	public void InstantiateBug(Vector3 position){
 		GameObject bug = Instantiate(bugPrefab);
 		bug.transform.SetParent(wallContainer);
-		bug.transform.position = position;
+		bug.transform.localPosition = position;
+		bugController = bug.GetComponent<BugController>() as BugController;
 		bug.transform.localScale = Vector3.one;
 	}
 
 	public void InstantiateGate(Vector3 position){
 		GameObject gate = Instantiate(gatePrefab);
 		gate.transform.SetParent(wallContainer);
-		gate.transform.position = position;
+		gate.transform.localPosition = position;
 		gate.transform.localScale = Vector3.one;
 	}
 
-
 	public Vector3 GetCellPosition(Cell cell){
-		return wallContainer.position + new Vector3(cell.index.x * cellWidth + cellWidth/2, cell.index.y * cellWidth + cellWidth/2, 0);
+		return new Vector3(cell.index.x * cellWidth + cellWidth/2, cell.index.y * cellWidth + cellWidth/2, 0);
 	}
 
 	public void FindPath(){
 		CheckPath(startPoint);
 		isFoundDestination = false;
 		path.Clear();
+	}
+
+	public void ShowPath(){
+		pathManager.ShowPath(ConvertPathToVector3(), bugController);
+	}
+
+	public Vector3[] ConvertPathToVector3(){
+		Vector3[] pathInVector3 = new Vector3[tempPath.Count];
+		for(int i = 0; i < tempPath.Count; i++){
+			Debug.Log(GetCellPosition(tempPath[i]));
+			pathInVector3[i] = new Vector3(GetCellPosition(tempPath[i]).x, GetCellPosition(tempPath[i]).y, 0f);
+		}
+		return pathInVector3;
 	}
 
 	public void CheckPath(Vector2Int index){
@@ -198,7 +210,6 @@ public class MazeGenerator : MonoBehaviour {
 			path.Add(currentCell);
 			tempPath = new List<Cell>(path);
 			isFoundDestination = true;
-			Debug.Log("Destination:" + index);
 			ShowPath();
 			return;
 		}
@@ -235,31 +246,7 @@ public class MazeGenerator : MonoBehaviour {
 		}
 	}
 
-	public void ShowPath(){
-		// pathRenderer.positionCount = path.Count;
-		// pathRenderer.SetPositions(ConvertPathToVector3());
-		Vector3[] pathInVector3 = ConvertPathToVector3();
-		GL.Begin(GL.LINES);
-		pathMaterial.SetPass(0);
-        
-        GL.Color(pathColor);
-        for(int i = 0; i < tempPath.Count - 1; i++){
-			GL.Vertex(pathInVector3[i]);
-			GL.Vertex(pathInVector3[i + 1]);
-		}
-        GL.End();
-
-	}
-
-	public Vector3[] ConvertPathToVector3(){
-		Vector3[] pathInVector3 = new Vector3[tempPath.Count];
-		for(int i = 0; i < tempPath.Count; i++){
-			Debug.Log(GetCellPosition(tempPath[i]));
-			pathInVector3[i] = new Vector3(GetCellPosition(tempPath[i]).x, GetCellPosition(tempPath[i]).y, -10f);
-		}
-
-		return pathInVector3;
-	}
+	
 
 	public bool IsSafe(Vector2Int index){
 		int x = index.x;
@@ -291,8 +278,15 @@ public class MazeGenerator : MonoBehaviour {
 	}
 
 	public float GetCellWidth(){
-		Vector3 topRight = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 10));
-		Vector3 topLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, Screen.height, 10));
+		Vector3 topRight = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height));
+		Vector3 topLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, Screen.height));
+
+		return (float) (topRight.x - topLeft.x) / col;
+	}
+
+	public float GetStandardCellWidth(){
+		Vector3 topRight = Camera.main.ScreenToWorldPoint(new Vector3(1080f, 1920f));
+		Vector3 topLeft = Camera.main.ScreenToWorldPoint(new Vector3(0, 1920f));
 
 		return (float) (topRight.x - topLeft.x) / col;
 	}

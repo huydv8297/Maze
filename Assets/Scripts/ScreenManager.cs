@@ -20,11 +20,12 @@ public class ScreenManager : MonoBehaviour {
 	float editorScreenScale = (float) 10f / 16f;
 	// Update is called once per frame
 
-	void Start(){
+	void Awake(){
 		currentScreenScale = (float) Screen.width / Screen.height;
 		Debug.Log(GetGameContainerScale());
 		stageBox.transform.localScale = new Vector3(GetGameContainerScale(), GetGameContainerScale(), 1);
 		playBox.transform.localScale = new Vector3(GetGameContainerScale(), GetGameContainerScale(), 1);
+		
 		ChangeToStageScreen();
 
 	}
@@ -61,6 +62,11 @@ public class ScreenManager : MonoBehaviour {
 
 	public float GetGameContainerScale(){
 		return currentScreenScale / editorScreenScale;
+	}
+
+	public void ScaleMaze(){
+		playBox.transform.localScale = new Vector3(GetGameContainerScale(), GetGameContainerScale(), 1);
+
 	}
 
 	
